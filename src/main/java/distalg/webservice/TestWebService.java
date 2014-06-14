@@ -7,8 +7,10 @@ import distalg.model.Algorithm;
 import javax.inject.Inject;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import java.util.List;
+import java.util.Random;
 
 /**
  * Created by home on 27.05.14.
@@ -44,13 +46,15 @@ public class TestWebService {
 
     @GET
     @Produces("text/plain")
-    @Path("/generate")
-    public String generateData(){
-        for (int i = 0; i < 10; i++) {
-            dataBean.generateData();
+    @Path("/generate/{min_length}/{max_length}/{count}")
+    public String generateData(@PathParam("max_length") int max_length, @PathParam("count") int count
+    , @PathParam("min_length") int min_length){
+        Random random = new Random();
+        for (int i = 0; i < count; i++) {
+            dataBean.generateData(min_length + random.nextInt(max_length - min_length));
         }
 
-        return "data generated";
+        return "data generated : max_length = " + max_length + " , min_length = " + min_length + " , count = " + count;
     }
 
 
