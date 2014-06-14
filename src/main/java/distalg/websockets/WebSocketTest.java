@@ -23,8 +23,8 @@ public class WebSocketTest {
     @OnMessage
     public void onMessage(String message, Session session)
             throws IOException, InterruptedException {
-        System.out.println("onMessage");
-        session.getAsyncRemote().sendText("alert('OK');");
+        System.out.println("onMessage 2 - " + message);
+        session.getAsyncRemote().sendText("done");
     }
 
     @OnOpen

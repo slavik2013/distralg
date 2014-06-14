@@ -7,6 +7,7 @@ import java.util.Collection;
  * Created by home on 13.06.14.
  */
 @Entity
+@Table(name = "algorithm")
 public class Algorithm {
     private int id;
     private String algorithm;

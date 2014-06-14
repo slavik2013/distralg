@@ -7,6 +7,9 @@ import org.codehaus.jackson.map.ObjectWriter;
 
 import javax.ejb.Singleton;
 import javax.ejb.Startup;
+import javax.json.Json;
+import javax.json.JsonArray;
+import javax.json.JsonWriter;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
@@ -138,39 +141,82 @@ public class EJBService {
 
     public String prepareTask(){
         Task task = new Task();
-        task.setTask(getAllDataJson());
+        task.setTask(getAllDataJson().replace("\\\"","\"").replace("\"[","[").replace("]\"","]"));
 
         TypedQuery<Algorithm> typedQuery = entityManager.createQuery("SELECT alg FROM Algorithm alg", Algorithm.class);
 
         List<Algorithm> list = typedQuery.getResultList() ;
         Algorithm singleAlgorithm = list.get(0);
 
-        ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
-        String algorithmJson = "";
+        final ByteArrayOutputStream out = new ByteArrayOutputStream();
+        final ObjectMapper mapper = new ObjectMapper();
+
         try {
-            algorithmJson = ow.writeValueAsString(singleAlgorithm);
+            mapper.writeValue(out, singleAlgorithm);
         } catch (IOException e) {
             e.printStackTrace();
         }
-        task.setAlgorithm(algorithmJson);
+
+        final byte[] singleAlgorithmdata = out.toByteArray();
+
+
+//        ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
+//        String algorithmJson = "";
+//        try {
+//            algorithmJson = ow.writeValueAsString(singleAlgorithm);
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+        task.setAlgorithm(new String(singleAlgorithmdata).replace("\\\"", "\"").replace("\"[","[").replace("]\"","]"));
         task.setCommand("process");
 
         ObjectWriter ow2 = new ObjectMapper().writer().withDefaultPrettyPrinter();
         String taskJson = "";
         try {
-            taskJson = ow.writeValueAsString(task);
+            taskJson = ow2.writeValueAsString(task);
         } catch (IOException e) {
             e.printStackTrace();
         }
         return taskJson;
     }
 
+    public String prepareTask2(){
+        JsonArray value = Json.createArrayBuilder()
+                .add(Json.createObjectBuilder()
+                        .add("type", "home")
+                        .add("number", "212 555-1234"))
+                .add(Json.createObjectBuilder()
+                        .add("type", "fax")
+                        .add("number", "646 555-4567"))
+                .build();
+
+        final ByteArrayOutputStream out = new ByteArrayOutputStream();
+        JsonWriter writer = Json.createWriter(out);
+
+        writer.writeArray(value);
+
+        return writer.toString();
+
+    }
 
     public void sendTask(String task){
 
+        String taskFiltered = task;
+
+        taskFiltered = task.replace("\\\"","\"");
+        taskFiltered = taskFiltered.replace("\"{","{");
+        taskFiltered = taskFiltered.replace("\"[","[");
+        taskFiltered = taskFiltered.replace("]\"","]");
+        taskFiltered = taskFiltered.replace("}\"","}");
+
+        taskFiltered = taskFiltered.replace("\\\\r"," ");
+        taskFiltered = taskFiltered.replace("\\\\n"," ");
+        /*taskFiltered = taskFiltered.replace("\\\\\"","\\\"");
+        taskFiltered = taskFiltered.replace("\\\\t"," ");*/
+
         for (Session session : peers.keySet()) {
             try {
-                session.getAsyncRemote().sendText(task);
+                session.getAsyncRemote().sendText(taskFiltered);
             } catch (Exception e) {
                 e.printStackTrace();
             }

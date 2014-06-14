@@ -25,17 +25,19 @@ var data;
 var parseData;
 function onMessage(event) {
     data = event.data;
-    document.getElementById('messages').innerHTML
-        += '<br />' + data;
     parseData = JSON.parse(data);
-    document.getElementById('messages').innerHTML
-        += '<br />' + parseData.command;
-    document.getElementById('messages').innerHTML
-        += '<br />' + parseData.algorithm;
-    document.getElementById('messages').innerHTML
-        += '<br />' + parseData.data;
+//    document.getElementById('messages').innerHTML
+//        += '<br />' + data;
+//    document.getElementById('messages').innerHTML
+//        += '<br />' + parseData;
+//    document.getElementById('messages').innerHTML
+//        += '<br />' + parseData.command;
+//    document.getElementById('messages').innerHTML
+//        += '<br />' + parseData.algorithm.algorithm;
+//    document.getElementById('messages').innerHTML
+//        += '<br />' + parseData.data;
 
-    eval(parseData.algorithm);
+    eval(parseData.algorithm.algorithm);
 
 }
 

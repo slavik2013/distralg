@@ -46,7 +46,7 @@ public class DataBean {
     }
 
 
-    public void generateData(){
+    public void generateData(int data_length){
         TypedQuery<Algorithm> typedQuery = entityManager.createQuery("SELECT alg FROM Algorithm alg", Algorithm.class);
 
         List<Algorithm> list = typedQuery.getResultList() ;
@@ -56,7 +56,8 @@ public class DataBean {
       // for(int i = 0; i < 10 ; i++){
             Data data = new Data();
             data.setAlgorithmByAlgorithmId(singleAlgorithm);
-            data.setData(getRandomString(1000));
+            data.setData(getRandomString(data_length));
+            data.setSize(data_length);
            dataList.add(data);
         entityManager.persist(data);
       // }
