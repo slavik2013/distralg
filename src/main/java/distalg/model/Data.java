@@ -9,10 +9,10 @@ import javax.persistence.*;
  */
 @Entity
 @Table(name = "data")
-public class Data {
+public class Data implements Comparable<Data>{
     private int id;
     private String data;
-    @JsonIgnore
+    //@JsonIgnore
     private int size;
     @JsonIgnore
     private int isProcessed;
@@ -21,6 +21,9 @@ public class Data {
 
     @JsonIgnore
     private Algorithm algorithmByAlgorithmId;
+
+    @Transient
+    public double size_vidnosn;
 
     @Id
     @Column(name = "id")
@@ -107,5 +110,15 @@ public class Data {
 
     public void setAlgorithmByAlgorithmId(Algorithm algorithmByAlgorithmId) {
         this.algorithmByAlgorithmId = algorithmByAlgorithmId;
+    }
+
+
+    @Override
+    public int compareTo(Data data_compare) {
+        if(this.size > data_compare.size)
+            return -1;
+        else if(this.size < data_compare.size)
+            return 1;
+        return 0;
     }
 }

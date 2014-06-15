@@ -26,7 +26,7 @@ var parseData;
 function onMessage(event) {
     data = event.data;
     parseData = JSON.parse(data);
-    document.getElementById('messages').innerHTML += '<br />' + data;
+   document.getElementById('messages').innerHTML += '<br />' + data;
 //    document.getElementById('messages').innerHTML
 //        += '<br />' + data;
 //    document.getElementById('messages').innerHTML
@@ -38,11 +38,17 @@ function onMessage(event) {
 //    document.getElementById('messages').innerHTML
 //        += '<br />' + parseData.data;
 
-    if(parseData.hasOwnProperty('command') && parseData.command == 'process')
+    if(parseData.hasOwnProperty('command') && parseData.command == 'process'){
+        document.getElementById('messages').innerHTML += '<br />' +"task running";
         eval(parseData.algorithm.algorithm);
-
-    else
-        document.getElementById('messages').innerHTML += '<br />' + data;
+    }
+    else{
+        //document.getElementById('messages').innerHTML += '<br />' +"time processing = " + parseData.time;
+       // document.getElementById('messages').innerHTML += '<br />' +"all time = " + parseData.all_time;
+        document.getElementById('messages').innerHTML += '<br />' +"speed = " + parseData.speed;
+        document.getElementById('messages').innerHTML += '<br />' +"connection speed = " + parseData.connection_speed;
+        document.getElementById('messages').innerHTML += '<br />' +"data size = " + parseData.data_size;
+    }
 
 }
 

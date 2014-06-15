@@ -30,6 +30,7 @@ public class EJBService {
 
     public Map<Session, PeerData> peerData = Collections.synchronizedMap(new HashMap<Session, PeerData>());
 
+    public Map<Session, LinkedList<Task>> peersTaskQueue = Collections.synchronizedMap(new HashMap<Session, LinkedList<Task>>());
 
     @PersistenceContext(name = "distralgunit")
     private EntityManager entityManager;
@@ -50,28 +51,41 @@ public class EJBService {
         return peerData;
     }
 
+    public PeerData getPeerDataBySession(Session session) {
+        if(peerData != null && !peerData.isEmpty()){
+            return peerData.get(session);
+        }
+            return null;
+    }
+
     public void addPeerData(Session session, PeerData peerData1){
         peerData.put(session, peerData1);
+        peersTaskQueue.put(session, new LinkedList<Task>());
     }
 
     public  Map<Session, Long> getPeersWithId() {
         return peers;
     }
 
-    public Set<Session> getPeers(){
+    public Set<Session> getPeersSet(){
         return peers.keySet();
+    }
+
+    public Map<Session,Long> getPeers(){
+        return peers;
     }
 
     public void setPeers(Map<Session, Long> peers) {
         this.peers = peers;
     }
 
-    public  void addPeer(Long id, Session session){
-        peers.put(session,id);
-    }
 
     public  void removePeer(Session session){
         peers.remove(session);
+    }
+
+    public  void addPeer(Long id, Session session){
+        peers.put(session,id);
     }
 
     public  Set<Long> getPeersId(){
@@ -107,23 +121,15 @@ public class EJBService {
 
         List<Algorithm> list = typedQuery.getResultList() ;
 
-        final ByteArrayOutputStream out = new ByteArrayOutputStream();
-        final ObjectMapper mapper = new ObjectMapper();
-
-        try {
-            mapper.writeValue(out, list);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        final byte[] data = out.toByteArray();
-        return new String(data);
+       return getJson(list);
     }
 
     public String getAllDataJson(){
         TypedQuery<Data> typedQuery = entityManager.createQuery("SELECT data FROM Data data", Data.class);
 
         List<Data> list = typedQuery.getResultList();
+
+
 
         return getJson(list);
     }
@@ -142,28 +148,87 @@ public class EJBService {
         return new String(data);
     }
 
+    public String filterString(String str){
+        return str.replace("\\\"","\"").replace("\"[","[").replace("]\"","]");
+    }
 
-    public String prepareTask(){
+    public String makeMeasure(){
         Task task = new Task();
-        task.setTask(getAllDataJson().replace("\\\"","\"").replace("\"[","[").replace("]\"","]"));
+        TypedQuery<Data> typedQueryData = entityManager.createQuery("SELECT data FROM Data data", Data.class).setMaxResults(1);
+        List<Data> list = typedQueryData.getResultList();
+
+        int size =  0;
+        for (int i = 0; i < list.size(); i++) {
+            System.out.println("size vidn = " + list.get(i).size_vidnosn);
+            size += list.get(i).getSize();
+        }
+        task.data_size = Long.valueOf(size);
+        System.out.println("size all = " + task.data_size);
+        task.setTask(filterString(getJson(list)));
 
         TypedQuery<Algorithm> typedQuery = entityManager.createQuery("SELECT alg FROM Algorithm alg", Algorithm.class);
 
-        List<Algorithm> list = typedQuery.getResultList() ;
-        Algorithm singleAlgorithm = list.get(0);
-
-        task.setAlgorithm(getJson(singleAlgorithm).replace("\\\"", "\"").replace("\"[","[").replace("]\"","]"));
+        task.setAlgorithm(filterString(getJson(typedQuery.getSingleResult())));
         task.setCommand("process");
         task.setTimeStart(System.currentTimeMillis());
 
-        ObjectWriter ow2 = new ObjectMapper().writer().withDefaultPrettyPrinter();
-        String taskJson = "";
-        try {
-            taskJson = ow2.writeValueAsString(task);
-        } catch (IOException e) {
-            e.printStackTrace();
+
+        return getJson(task);
+    }
+
+    public boolean ckechForReady(){
+        for(Map.Entry<Session, PeerData> entry: peerData.entrySet()) {
+            if(entry.getValue().speed  <= 0)
+                return false;
         }
-        return taskJson;
+        return true;
+    }
+
+
+    public String prepareTask(){
+        if(!ckechForReady()){
+            return makeMeasure();
+        }
+        Task task = new Task();
+        TypedQuery<Data> typedQueryData = entityManager.createQuery("SELECT data FROM Data data", Data.class);
+
+        List<Data> list = typedQueryData.getResultList();
+
+        Collections.sort(list);
+
+        int max_size = list.get(0).getSize();
+
+        for (int i = 0; i < list.size(); i++) {
+            list.get(i).size_vidnosn = 100 * list.get(i).getSize()/max_size;
+        }
+
+        List<PeerData> peerDataList = new ArrayList<>();
+        for(Map.Entry<Session, PeerData> entry: peerData.entrySet()) {
+            peerDataList.add(entry.getValue());
+        }
+
+        Collections.sort(peerDataList);
+
+        for (int i = 0; i < peerDataList.size(); i++) {
+            System.out.println("peerDataList = " + peerDataList.get(i).general_speed);
+        }
+
+        int size =  0;
+        for (int i = 0; i < list.size(); i++) {
+            System.out.println("size vidn = " + list.get(i).size_vidnosn);
+            size += list.get(i).getSize();
+        }
+        task.data_size = Long.valueOf(size);
+        System.out.println("size all = " + task.data_size);
+        task.setTask(filterString(getJson(list)));
+
+        TypedQuery<Algorithm> typedQuery = entityManager.createQuery("SELECT alg FROM Algorithm alg", Algorithm.class);
+
+        task.setAlgorithm(filterString(getJson(typedQuery.getSingleResult())));
+        task.setCommand("process");
+        task.setTimeStart(System.currentTimeMillis());
+
+       return getJson(task);
     }
 
     public String prepareTask2(){
@@ -197,15 +262,9 @@ public class EJBService {
 
         taskFiltered = taskFiltered.replace("\\\\r"," ");
         taskFiltered = taskFiltered.replace("\\\\n"," ");
-        /*taskFiltered = taskFiltered.replace("\\\\\"","\\\"");
-        taskFiltered = taskFiltered.replace("\\\\t"," ");*/
 
         for (Session session : peers.keySet()) {
-            try {
-                session.getAsyncRemote().sendText(taskFiltered);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+           session.getAsyncRemote().sendText(taskFiltered);
         }
     }
 

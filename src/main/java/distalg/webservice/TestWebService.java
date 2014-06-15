@@ -16,7 +16,7 @@ import java.util.Random;
  * Created by home on 27.05.14.
  */
 
-@Path("/test")
+@Path("/")
 public class TestWebService {
 
     @Inject

@@ -19,5 +19,6 @@ var time_of_data_processing = (new Date()).getTime() - time_start;
 json_answer['results'] = object_array;
 json_answer['time'] = time_of_data_processing;
 json_answer['time_start'] = parsedJson.time_start;
+json_answer['data_size'] = parsedJson.data_size;
 var returnJson = JSON.stringify(json_answer);
 webSocket.send(returnJson);

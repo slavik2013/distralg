@@ -3,7 +3,7 @@ package distalg.ejb;
 /**
  * Created by home on 27.05.14.
  */
-public class Task {
+public class Task implements Comparable<Task>{
 
     public String command;
     public String algorithm;
@@ -61,5 +61,10 @@ public class Task {
 
     public void setData_size(Long data_size) {
         this.data_size = data_size;
+    }
+
+    @Override
+    public int compareTo(Task task) {
+        return 0;
     }
 }
