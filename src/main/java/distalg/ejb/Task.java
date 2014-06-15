@@ -8,14 +8,19 @@ public class Task {
     public String command;
     public String algorithm;
     public Object tasks;
+    public Long time_start;
+    public Long data_size;
 
     public Task() {
+
     }
 
-    public Task(String command, String algorithm, Object tasks) {
+    public Task(String command, String algorithm, Object tasks, Long time_start, Long data_size) {
         this.command = command;
         this.algorithm = algorithm;
         this.tasks = tasks;
+        this.time_start = time_start;
+        this.data_size = data_size;
     }
 
     public String getCommand() {
@@ -40,5 +45,21 @@ public class Task {
 
     public void setTask(Object tasks) {
         this.tasks = tasks;
+    }
+
+    public Long getTimeStart() {
+        return time_start;
+    }
+
+    public void setTimeStart(Long time_start) {
+        this.time_start = time_start;
+    }
+
+    public Long getData_size() {
+        return data_size;
+    }
+
+    public void setData_size(Long data_size) {
+        this.data_size = data_size;
     }
 }

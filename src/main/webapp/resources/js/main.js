@@ -26,6 +26,7 @@ var parseData;
 function onMessage(event) {
     data = event.data;
     parseData = JSON.parse(data);
+    document.getElementById('messages').innerHTML += '<br />' + data;
 //    document.getElementById('messages').innerHTML
 //        += '<br />' + data;
 //    document.getElementById('messages').innerHTML
@@ -37,10 +38,13 @@ function onMessage(event) {
 //    document.getElementById('messages').innerHTML
 //        += '<br />' + parseData.data;
 
-    eval(parseData.algorithm.algorithm);
+    if(parseData.hasOwnProperty('command') && parseData.command == 'process')
+        eval(parseData.algorithm.algorithm);
+
+    else
+        document.getElementById('messages').innerHTML += '<br />' + data;
 
 }
-
 
 function onOpen(event) {
     document.getElementById('messages').innerHTML = 'Connection established' ;
@@ -52,12 +56,8 @@ function onError(event) {
 }
 
 function start() {
-    webSocket.send('hello');
+    webSocket.send('start');
     return false;
 }
 
-function test(){
-    webSocket.send('startTest');
-    return false;
-}
 

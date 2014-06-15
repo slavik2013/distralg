@@ -40,7 +40,7 @@ public class TestWebService {
         String data = "1 2 3 4 5 6 7 8 9";
         String command = "run";
 
-        ejbService.makeTask(new Task(command,algorithm,data));
+        ejbService.makeTask(new Task(command,algorithm,data, 0L,0L));
         return "task Started";
     }
 

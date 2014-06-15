@@ -30,7 +30,7 @@ public class WebSocketTest {
     @OnMessage
     public void onMessage(String message, Session session)
             throws IOException, InterruptedException {
-       System.out.println("onMessage 2 - " + message);
+       System.out.println("onMessage  - " + message);
 
         long time_returned = System.currentTimeMillis();
 

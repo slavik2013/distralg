@@ -123,13 +123,17 @@ public class EJBService {
     public String getAllDataJson(){
         TypedQuery<Data> typedQuery = entityManager.createQuery("SELECT data FROM Data data", Data.class);
 
-        List<Data> list = typedQuery.getResultList() ;
+        List<Data> list = typedQuery.getResultList();
 
+        return getJson(list);
+    }
+
+    public String getJson( Object object){
         final ByteArrayOutputStream out = new ByteArrayOutputStream();
         final ObjectMapper mapper = new ObjectMapper();
 
         try {
-            mapper.writeValue(out, list);
+            mapper.writeValue(out, object);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -148,27 +152,9 @@ public class EJBService {
         List<Algorithm> list = typedQuery.getResultList() ;
         Algorithm singleAlgorithm = list.get(0);
 
-        final ByteArrayOutputStream out = new ByteArrayOutputStream();
-        final ObjectMapper mapper = new ObjectMapper();
-
-        try {
-            mapper.writeValue(out, singleAlgorithm);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        final byte[] singleAlgorithmdata = out.toByteArray();
-
-
-//        ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
-//        String algorithmJson = "";
-//        try {
-//            algorithmJson = ow.writeValueAsString(singleAlgorithm);
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-        task.setAlgorithm(new String(singleAlgorithmdata).replace("\\\"", "\"").replace("\"[","[").replace("]\"","]"));
+        task.setAlgorithm(getJson(singleAlgorithm).replace("\\\"", "\"").replace("\"[","[").replace("]\"","]"));
         task.setCommand("process");
+        task.setTimeStart(System.currentTimeMillis());
 
         ObjectWriter ow2 = new ObjectMapper().writer().withDefaultPrettyPrinter();
         String taskJson = "";
