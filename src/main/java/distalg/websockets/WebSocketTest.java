@@ -31,9 +31,11 @@ public class WebSocketTest {
     public void onMessage(String message, Session session)
             throws IOException, InterruptedException {
 
-       System.out.println("onMessage  - " + message);
+      // System.out.println("onMessage  - " + message);
 
-        System.out.println("message peers " + ejbService.getPeers());
+       // System.out.println("message peers " + ejbService.getPeers());
+
+        System.out.println("time = " + (System.currentTimeMillis() - ejbService.getTime_send()));
 
         if(ejbService.getPeers() != null && !ejbService.getPeers().isEmpty())
             System.out.println("message from client # " + ejbService.getPeers().get(session));

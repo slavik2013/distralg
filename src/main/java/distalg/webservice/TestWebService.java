@@ -26,25 +26,6 @@ public class TestWebService {
     DataBean dataBean;
 
     @GET
-    @Produces("application/json")
-    public String test(){
-//        return dataBean.getAllAlgorithmJson();
-        return ejbService.getAllAlgorithmJson();
-    }
-
-    @GET
-    @Produces("text/plain")
-    @Path("/task")
-    public String runTask(){
-        String algorithm = "multiply();function multiply(){var array = parseData.data.split(\" \"); var result = 1;for (var i = 0; i < array.length; i++) {result = result * array[i]; }alert(result);}";
-        String data = "1 2 3 4 5 6 7 8 9";
-        String command = "run";
-
-        ejbService.makeTask(new Task(command,algorithm,data, 0L,0L));
-        return "task Started";
-    }
-
-    @GET
     @Produces("text/plain")
     @Path("/generate/{min_length}/{max_length}/{count}")
     public String generateData(@PathParam("max_length") int max_length, @PathParam("count") int count
@@ -57,22 +38,27 @@ public class TestWebService {
         return "data generated : max_length = " + max_length + " , min_length = " + min_length + " , count = " + count;
     }
 
-
-    @GET
-    @Produces("application/json")
-    @Path("/gettask")
-    public String getTask(){
-
-        return ejbService.prepareTask();
-    }
-
-
     @GET
     @Produces("text/plain")
     @Path("/sendtask")
     public String sendTask(){
-
-         ejbService.sendTask(ejbService.prepareTask());
+        ejbService.prepareTask();
         return "sended";
+    }
+
+    @GET
+    @Produces("text/plain")
+    @Path("/test/{limit}")
+    public String makeMeasure(@PathParam("limit") int limit){
+        ejbService.makeMeasure(limit);
+        return "measured";
+    }
+
+    @GET
+    @Produces("text/plain")
+    @Path("/clear")
+    public String clear(){
+        ejbService.clearData();
+        return "cleared";
     }
 }

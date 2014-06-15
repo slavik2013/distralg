@@ -26,7 +26,7 @@ var parseData;
 function onMessage(event) {
     data = event.data;
     parseData = JSON.parse(data);
-   document.getElementById('messages').innerHTML += '<br />' + data;
+   //document.getElementById('messages').innerHTML += '<br />' + data + '<br />';
 //    document.getElementById('messages').innerHTML
 //        += '<br />' + data;
 //    document.getElementById('messages').innerHTML

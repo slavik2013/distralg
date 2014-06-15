@@ -39,6 +39,12 @@ public class EJBService {
 
     }
 
+    public void clearData(){
+        peers.clear();
+        peerData.clear();
+        peersTaskQueue.clear();
+    }
+
     public List<Algorithm> getAlgorithm(){
 
         TypedQuery<Algorithm> typedQuery = entityManager.createQuery("SELECT alg FROM Algorithm alg", Algorithm.class);
@@ -152,9 +158,15 @@ public class EJBService {
         return str.replace("\\\"","\"").replace("\"[","[").replace("]\"","]");
     }
 
-    public String makeMeasure(){
+    public void makeMeasure(int limit){
         Task task = new Task();
-        TypedQuery<Data> typedQueryData = entityManager.createQuery("SELECT data FROM Data data", Data.class).setMaxResults(1);
+        TypedQuery<Data> typedQueryData;
+        if(limit > 0)
+          typedQueryData = entityManager.createQuery("SELECT data FROM Data data", Data.class).setMaxResults(limit);
+        else
+          typedQueryData = entityManager.createQuery("SELECT data FROM Data data", Data.class);
+
+
         List<Data> list = typedQueryData.getResultList();
 
         int size =  0;
@@ -172,9 +184,10 @@ public class EJBService {
         task.setCommand("process");
         task.setTimeStart(System.currentTimeMillis());
 
-
-        return getJson(task);
+        sendTask(getJson(task));
     }
+
+
 
     public boolean ckechForReady(){
         for(Map.Entry<Session, PeerData> entry: peerData.entrySet()) {
@@ -185,10 +198,10 @@ public class EJBService {
     }
 
 
-    public String prepareTask(){
-        if(!ckechForReady()){
-            return makeMeasure();
-        }
+    public void prepareTask(){
+//        if(!ckechForReady()){
+//             makeMeasure();
+//        }
         Task task = new Task();
         TypedQuery<Data> typedQueryData = entityManager.createQuery("SELECT data FROM Data data", Data.class);
 
@@ -218,53 +231,83 @@ public class EJBService {
             System.out.println("size vidn = " + list.get(i).size_vidnosn);
             size += list.get(i).getSize();
         }
-        task.data_size = Long.valueOf(size);
-        System.out.println("size all = " + task.data_size);
-        task.setTask(filterString(getJson(list)));
 
         TypedQuery<Algorithm> typedQuery = entityManager.createQuery("SELECT alg FROM Algorithm alg", Algorithm.class);
 
-        task.setAlgorithm(filterString(getJson(typedQuery.getSingleResult())));
-        task.setCommand("process");
-        task.setTimeStart(System.currentTimeMillis());
+        String algorithmJson = filterString(getJson(typedQuery.getSingleResult()));
 
-       return getJson(task);
+        ListIterator<Data> dataListIterator = list.listIterator();
+
+        while(dataListIterator.hasNext()){
+            for (int i = 0; i < peerDataList.size(); i++) {
+                if(dataListIterator.hasNext()){
+                    PeerData peerData1 = peerDataList.get(i);
+                    Session session = peerData1.getSession();
+                    if(peersTaskQueue.get(session).isEmpty()){
+                        Task task2 = new Task();
+                        task2.setAlgorithm(algorithmJson);
+                        task2.setCommand("process");
+                        task.setTimeStart(System.currentTimeMillis());
+                        peersTaskQueue.get(session).add(task2);
+                    }
+                    Task task1 = peersTaskQueue.get(session).getFirst();
+                    task1.getTasks_list().add(dataListIterator.next());
+                }
+
+            }
+        }
+
+        for (int i = 0; i < peerDataList.size(); i++) {
+            PeerData peerData1 = peerDataList.get(i);
+            Session session = peerData1.getSession();
+            Task task1 = peersTaskQueue.get(session).getFirst();
+            List<Data> datas = task1.getTasks_list();
+            task1.setTask(filterString(getJson(datas)));
+        }
+
+        sendTask();
+
     }
 
-    public String prepareTask2(){
-        JsonArray value = Json.createArrayBuilder()
-                .add(Json.createObjectBuilder()
-                        .add("type", "home")
-                        .add("number", "212 555-1234"))
-                .add(Json.createObjectBuilder()
-                        .add("type", "fax")
-                        .add("number", "646 555-4567"))
-                .build();
 
-        final ByteArrayOutputStream out = new ByteArrayOutputStream();
-        JsonWriter writer = Json.createWriter(out);
+    public String filterTaskString(String string){
+        string = string.replace("\\\"","\"");
+        string = string.replace("\"{","{");
+        string = string.replace("\"[","[");
+        string = string.replace("]\"","]");
+        string = string.replace("}\"","}");
+        string = string.replace("\\\\r"," ");
+        string = string.replace("\\\\n"," ");
 
-        writer.writeArray(value);
-
-        return writer.toString();
-
+        return string;
     }
 
     public void sendTask(String task){
-
-        String taskFiltered = task;
-
-        taskFiltered = task.replace("\\\"","\"");
-        taskFiltered = taskFiltered.replace("\"{","{");
-        taskFiltered = taskFiltered.replace("\"[","[");
-        taskFiltered = taskFiltered.replace("]\"","]");
-        taskFiltered = taskFiltered.replace("}\"","}");
-
-        taskFiltered = taskFiltered.replace("\\\\r"," ");
-        taskFiltered = taskFiltered.replace("\\\\n"," ");
+        time_send = System.currentTimeMillis();
+        String taskFiltered = filterTaskString(task);
 
         for (Session session : peers.keySet()) {
            session.getAsyncRemote().sendText(taskFiltered);
+        }
+    }
+
+    long time_send = 0;
+
+    public long getTime_send() {
+        return time_send;
+    }
+
+    public void setTime_send(long time_send) {
+        this.time_send = time_send;
+    }
+
+    public void sendTask(){
+        time_send = System.currentTimeMillis();
+        System.out.println("time send = " + System.currentTimeMillis());
+        for(Map.Entry<Session, LinkedList<Task>> entry: peersTaskQueue.entrySet()) {
+            Task task = entry.getValue().getFirst();
+            Session session = entry.getKey();
+            session.getAsyncRemote().sendText(filterTaskString(getJson(task)));
         }
     }
 

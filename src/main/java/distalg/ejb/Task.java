@@ -1,5 +1,11 @@
 package distalg.ejb;
 
+import distalg.model.Data;
+import org.codehaus.jackson.annotate.JsonIgnore;
+
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Created by home on 27.05.14.
  */
@@ -10,6 +16,9 @@ public class Task implements Comparable<Task>{
     public Object tasks;
     public Long time_start;
     public Long data_size;
+
+    @JsonIgnore
+    public List<Data> tasks_list = new ArrayList<Data>();
 
     public Task() {
 
@@ -66,5 +75,13 @@ public class Task implements Comparable<Task>{
     @Override
     public int compareTo(Task task) {
         return 0;
+    }
+
+    public List<Data> getTasks_list() {
+        return tasks_list;
+    }
+
+    public void setTasks_list(List<Data> tasks_list) {
+        this.tasks_list = tasks_list;
     }
 }
