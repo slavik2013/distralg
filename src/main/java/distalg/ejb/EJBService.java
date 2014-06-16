@@ -19,9 +19,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.*;
 
-/**
- * Created by home on 26.05.14.
- */
 @Startup
 @Singleton
 public class EJBService {

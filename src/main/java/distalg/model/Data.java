@@ -4,9 +4,7 @@ import org.codehaus.jackson.annotate.JsonIgnore;
 
 import javax.persistence.*;
 
-/**
- * Created by home on 13.06.14.
- */
+
 @Entity
 @Table(name = "data")
 public class Data implements Comparable<Data>{

@@ -6,9 +6,6 @@ import org.codehaus.jackson.annotate.JsonIgnore;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Created by home on 27.05.14.
- */
 public class Task implements Comparable<Task>{
 
     public String command;

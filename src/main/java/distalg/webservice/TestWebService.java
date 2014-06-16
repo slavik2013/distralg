@@ -12,9 +12,7 @@ import javax.ws.rs.Produces;
 import java.util.List;
 import java.util.Random;
 
-/**
- * Created by home on 27.05.14.
- */
+
 
 @Path("/")
 public class TestWebService {

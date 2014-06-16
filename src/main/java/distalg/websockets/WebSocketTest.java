@@ -1,9 +1,5 @@
 package distalg.websockets;
 
-/**
- * Created by home on 26.05.14.
- */
-
 import distalg.ejb.EJBService;
 import distalg.ejb.PeerData;
 import org.json.JSONArray;
@@ -30,10 +26,6 @@ public class WebSocketTest {
     @OnMessage
     public void onMessage(String message, Session session)
             throws IOException, InterruptedException {
-
-      // System.out.println("onMessage  - " + message);
-
-       // System.out.println("message peers " + ejbService.getPeers());
 
         System.out.println("time = " + (System.currentTimeMillis() - ejbService.getTime_send()));
 
@@ -77,11 +69,6 @@ public class WebSocketTest {
 
             session.getAsyncRemote().sendText(answer.toString());
 
-//        List<String> list = new ArrayList<String>();
-//        JSONArray array = obj.getJSONArray("interests");
-//        for(int i = 0 ; i < array.length() ; i++){
-//            list.add(array.getJSONObject(i).getString("interestKey"));
-//        }
 
         }
     }

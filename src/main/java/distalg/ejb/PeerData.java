@@ -1,8 +1,5 @@
 package distalg.ejb;
 
-/**
- * Created by home on 27.05.14.
- */
 import javax.websocket.Session;
 
 
@@ -62,13 +59,6 @@ public class PeerData implements Comparable<PeerData>{
 
     @Override
     public int compareTo(PeerData peerData) {
-//        double speed1 = (1/(double)this.timeConnection) + (1/(double)this.speed);
-//        double speed2 = (1/(double)peerData.timeConnection) + (1/(double)peerData.speed);
-//        if(speed1 > speed2)
-//            return -1;
-//        else if(speed1 < speed2)
-//            return 1;
-
 
         if(this.general_speed > peerData.general_speed)
             return -1;

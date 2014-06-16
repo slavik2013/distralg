@@ -1,6 +1,3 @@
-/**
- * Created by home on 15.06.14.
- */
 var time_start = (new Date()).getTime();
 var parsedJson = JSON.parse(data);
 var count = 0;
@@ -22,3 +19,4 @@ json_answer['time_start'] = parsedJson.time_start;
 json_answer['data_size'] = parsedJson.data_size;
 var returnJson = JSON.stringify(json_answer);
 webSocket.send(returnJson);
+alert(returnJson);

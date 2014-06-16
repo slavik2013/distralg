@@ -1,6 +1,4 @@
-/**
- * Created by home on 27.05.14.
- */
+
 var webSocket;
 var port =":8000";
 
@@ -26,7 +24,7 @@ var parseData;
 function onMessage(event) {
     data = event.data;
     parseData = JSON.parse(data);
-   //document.getElementById('messages').innerHTML += '<br />' + data + '<br />';
+   document.getElementById('messages').innerHTML += '<br />' + data + '<br />';
 //    document.getElementById('messages').innerHTML
 //        += '<br />' + data;
 //    document.getElementById('messages').innerHTML
